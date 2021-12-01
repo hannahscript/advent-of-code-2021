@@ -1,7 +1,7 @@
 function getinput()
     input = read("input.txt", String)
     lines = split(input, "\n")
-    return map(line -> parse(Int64, line), lines)
+    return map(line -> parse(Int64, line), filter(line -> !isempty(line), lines))
 end
 
 function part1(depths)
