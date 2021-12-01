@@ -17,14 +17,10 @@ end
 
 function part2(depths)
     increases = 0
-    prevwindow = sum(depths[1:3])
     for i = 4:length(depths)
-        window = prevwindow - depths[i - 3] + depths[i]
-        if window > prevwindow
+        if depths[i] > depths[i - 3]
             increases += 1
         end
-
-        prevwindow = window
     end
 
     return increases
