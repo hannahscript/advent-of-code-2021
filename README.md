@@ -6,4 +6,14 @@ This year's [Advent of Code](https://adventofcode.com), I will use [Julia](https
 
 ## Day 01
 
-Basic reading of input and program skeleton done.
+- [x]️ Part 1
+- [x]️ Part 2
+- [x]️ Initial solution refactored
+- [x]️ Golfed
+
+## Day 02
+
+- [x]️ Part 1
+- [x]️ Part 2
+- [x]️ Initial solution refactored
+- [x]️ Golfed
