@@ -1,13 +1,9 @@
 function getinput()
-    input = read("input.txt", String)
-    lines = filter(line -> !isempty(line), split(input, "\r\n"))
-    return map(line -> map(c -> parse(Int, c), split(line, "")), lines)
+    lines = readlines("input.txt")
+    return map(bits -> parse.(Int, bits), split.(lines, ""))
 end
 
-function find_most_common(report)
-    reportlen_half = length(report) / 2
-    return map(n -> n == reportlen_half ? 1 : n > reportlen_half, sum(report))
-end
+find_most_common(report) = sum(report) .>= length(report) / 2
 
 function part1(most_common)
     most_common = find_most_common(report)
@@ -28,7 +24,7 @@ function part2(report)
         for i in 1:length(most_common)
             leftovers = filter(line -> r == 1 ? line[i] == most_common[i] : line[i] != most_common[i], leftovers)
             if (length(leftovers) == 1)
-                ratings[r] = parse(Int, join(leftovers[1],""), base=2)
+                ratings[r] = parse(Int, join(leftovers[1]), base=2)
                 break
             end
 
