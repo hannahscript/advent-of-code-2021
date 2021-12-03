@@ -3,6 +3,12 @@ struct Command
     arg1::Int64
 end
 
+struct EndPosition
+    aim::Int64
+    depth::Int64
+    horizontal::Int64
+end
+
 function parsecommand(word)
     (name, arg) = split(word)
     return Command(name, parse(Int64, arg))
@@ -14,26 +20,7 @@ function getinput()
     return map(parsecommand, filter(line -> !isempty(line), lines))
 end
 
-function part1(commands)
-    depth = 0
-    horizontal = 0
-
-    for cmd in commands
-        if cmd.name == "up"
-            depth -= cmd.arg1
-        elseif cmd.name == "down"
-            depth += cmd.arg1
-        elseif cmd.name == "forward"
-            horizontal += cmd.arg1
-        else
-            throw(DomainError(cmd, "Unknown command"))
-        end
-    end
-
-    return depth * horizontal
-end
-
-function part2(commands)
+function steer(commands)
     depth = 0
     horizontal = 0
     aim = 0
@@ -51,9 +38,13 @@ function part2(commands)
         end
     end
 
-    return depth * horizontal
+    return EndPosition(aim, depth, horizontal)
 end
 
-commands = getinput()
-println("Part 1: " * string(part1(commands)))
-println("Part 2: " * string(part2(commands)))
+part1(endpos) = endpos.aim * endpos.horizontal
+
+part2(endpos) = endpos.depth * endpos.horizontal
+
+endpos = getinput() |> steer
+println("Part 1: " * string(part1(endpos)))
+println("Part 2: " * string(part2(endpos)))
