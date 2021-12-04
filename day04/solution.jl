@@ -3,41 +3,63 @@ function getinput()
 
     draws = parse.(Int, split(lines[1], ","))
 
-    boards = []
-    currentvec = []
     dim = split(lines[3], " ") |> length
+    # n + n * dim - 1 = length - 2
+    boardtrix = Array{Int64}(undef, 5, 5, div(length(lines) - 1, 1 + dim))
+    currentvec = []
+    currentboard_n = 1
     for line in lines[3:end]
         if isempty(line)
-            push!(boards, reshape(currentvec, dim, dim))
+            boardtrix[:, :, currentboard_n] = reshape(currentvec, dim, dim)
             currentvec = []
+            currentboard_n += 1
         else
-            append!(currentvec, parse.(Int, split(line, r"\s+")))
+            append!(currentvec, parse.(Int64, split(line, r"\s+")))
         end
     end
 
-    return (draws=draws, boards=boards)
+    boardtrix[:, :, currentboard_n] = reshape(currentvec, dim, dim)
+
+    return draws, boardtrix
 end
 
-function strikedraw(board, draw)
-    i = findfirst(==(draw), board)
-    if isnothing(i)
-        return false
+function check_row(boards, b, y)
+    for x in 1:size(boards)[2]
+        if boards[y, x, b] != 0
+            return false
+        end
     end
-    board[i] = 0
 
-    col = board[i[1], :]
-    row = board[:, i[2]]
+    return true
+end
 
-    return sum(row) == 0 || sum(col) == 0
+function check_col(boards, b, x)
+    for y in 1:size(boards)[1]
+        if boards[y, x, b] != 0
+            return false
+        end
+    end
+
+    return true
+end
+
+function strikedraw(boards, b, draw)
+    for col in 1:5, row in 1:5
+        if boards[row, col, b] == draw
+            boards[row, col, b] = 0
+            return check_col(boards, b, col) || check_row(boards, b, row)
+        end
+    end
+    return false
 end
 
 function part1((draws, boards))
     for draw in draws
-        for board in boards
-            bingo = strikedraw(board, draw)
+        for b in 1:size(boards)[3]
+            bingo = strikedraw(boards, b, draw)
 
             if bingo
-                return draw * sum(board)
+                return draw * sum(boards[:, :, b])
             end
         end
     end
@@ -45,23 +67,39 @@ end
 
 function part2((draws, boards))
     solved = Set()
-    enumerated_boards = enumerate(boards)
+
     for draw in draws
-        for (i, board) in enumerated_boards
-            i in solved && continue
+        for b in 1:size(boards)[3]
+            b in solved && continue
 
-            bingo = strikedraw(board, draw)
+            bingo = strikedraw(boards, b, draw)
             if bingo
-                push!(solved, i)
+                push!(solved, b)
 
-                if (length(boards) == length(solved))
-                    return draw * sum(board)
+                if (size(boards)[3] == length(solved))
+                    return draw * sum(boards[:, :, b])
                 end
             end
         end
     end
 end
 
-input = getinput()
-println("Part 1: $(part1(input))") # 8442
-println("Part 2: $(part2(input))") # 4590
+function bench(input)
+    draws = copy(input[1])
+    boards = copy(input[2])
+    p1 = part1((draws, boards))
+
+    draws = copy(input[1])
+    boards = copy(input[2])
+    p2 = part2((draws, boards))
+end
+
+# Thank you Gandalf and Casey
+function main()
+    p1 = part1(getinput())
+    p2 = part2(getinput())
+    println("Part 1: $(p1)") # 8442
+    println("Part 2: $(p2)") # 4590
+end
+
+main()
