@@ -5,7 +5,7 @@ end
 
 find_most_common(report) = sum(report) .>= length(report) / 2
 
-function part1(most_common)
+function part1(report)
     most_common = find_most_common(report)
     rates = [0, 0]
     for (i, d) in enumerate(reverse(most_common))
