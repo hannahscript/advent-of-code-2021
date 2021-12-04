@@ -25,8 +25,8 @@ function strikedraw(board, draw)
     end
     board[i] = 0
 
-    row = board[i[1], :]
-    col = board[:, i[2]]
+    col = board[i[1], :]
+    row = board[:, i[2]]
 
     return sum(row) == 0 || sum(col) == 0
 end
