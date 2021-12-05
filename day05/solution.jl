@@ -50,11 +50,7 @@ function getpoints(line)
     return zip(xs, ys)
 end
 
-function count_intersections(lines)
-    xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
-    ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
-
-    grid = zeros(ymax + 1, xmax + 1)
+function count_intersections(lines, grid)
     for line in lines
         points = getpoints(line)
         for p in points
@@ -65,25 +61,46 @@ function count_intersections(lines)
     return count(>(1), grid)
 end
 
-function part1(lines)
-    allowedlines = filter(line -> isvertical(line) || ishorizontal(line), lines)
-    return count_intersections(allowedlines)
+function partition(p, xs)
+   matches = []
+   rest = []
+   for x in xs
+    push!(p(x) ? matches : rest, x)
+   end
+
+   return (matches, rest)
 end
 
-function part2(lines)
-    return count_intersections(lines)
+function part1(lines, grid)
+    return count_intersections(lines, grid)
+end
+
+function part2(lines, grid)
+    return count_intersections(lines, grid)
 end
 
 function main()
     lines = getinput()
-    println("Part 1: $(part1(lines))") # 6710
-    println("Part 2: $(part2(lines))") # 20121
+    (straights, diagonals) = partition(line -> isvertical(line) || ishorizontal(line), lines)
+
+    xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
+    ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
+    grid = zeros(ymax + 1, xmax + 1)
+
+    println("Part 1: $(part1(straights, grid))") # 6710
+    println("Part 2: $(part2(diagonals, grid))") # 20121
 end
 
 function bench()
     lines = getinput()
-    part1(lines)
-    part2(lines)
+    (straights, diagonals) = partition(line -> isvertical(line) || ishorizontal(line), lines)
+
+    xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
+    ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
+    grid = zeros(ymax + 1, xmax + 1)
+
+    part1(straights, grid)
+    part2(diagonals, grid)
 end
 
 main()
