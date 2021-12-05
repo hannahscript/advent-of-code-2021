@@ -48,7 +48,7 @@ end
 
 function count_intersections(lines, grid)
     for line in lines, p in getpoints(line)
-        grid[p...] += 1
+        grid[p[1], p[2]] += 1
     end
 
     return count(>(1), grid)
@@ -78,7 +78,7 @@ function solve()
 
     xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
     ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
-    grid = zeros(ymax , xmax )
+    grid = zeros(ymax , xmax)
 
     return part1(straights, grid), part2(diagonals, grid)
 end
