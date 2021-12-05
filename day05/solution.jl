@@ -15,7 +15,7 @@ function getinput()
         (x1, y1) = parse.(Int64, split(start, ","))
         (x2, y2) = parse.(Int64, split(finish, ","))
 
-        return LineSegment(Point(x1, y1), Point(x2, y2))
+        return LineSegment(Point(x1 + 1, y1 + 1), Point(x2 + 1, y2 + 1))
     end
 end
 
@@ -27,35 +27,28 @@ function isvertical(line)
     return line.a.x == line.b.x
 end
 
-function getxs(line)
-    return line.a.x:sign(line.b.x - line.a.x):line.b.x
-end
-
-function getys(line)
-    return line.a.y:sign(line.b.y - line.a.y):line.b.y
+function getseq(a, b)
+    return a:sign(b - a):b
 end
 
 function getpoints(line)
     if ishorizontal(line)
-        xs = getxs(line)
+        xs = getseq(line.a.x, line.b.x)
         ys = fill(line.a.y, length(xs))
     elseif isvertical(line)
-        ys = getys(line)
+        ys = getseq(line.a.y, line.b.y)
         xs = fill(line.a.x, length(ys))
     else
-        xs = getxs(line)
-        ys = getys(line)
+        xs = getseq(line.a.x, line.b.x)
+        ys = getseq(line.a.y, line.b.y)
     end
 
-    return zip(xs, ys)
+    return zip(ys, xs)
 end
 
 function count_intersections(lines, grid)
-    for line in lines
-        points = getpoints(line)
-        for p in points
-            grid[p[2] + 1, p[1] + 1] += 1
-        end
+    for line in lines, p in getpoints(line)
+        grid[p...] += 1
     end
 
     return count(>(1), grid)
@@ -65,7 +58,7 @@ function partition(p, xs)
    matches = []
    rest = []
    for x in xs
-    push!(p(x) ? matches : rest, x)
+       push!(p(x) ? matches : rest, x)
    end
 
    return (matches, rest)
@@ -85,7 +78,7 @@ function solve()
 
     xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
     ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
-    grid = zeros(ymax + 1, xmax + 1)
+    grid = zeros(ymax , xmax )
 
     return part1(straights, grid), part2(diagonals, grid)
 end
