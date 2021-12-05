@@ -27,60 +27,56 @@ function isvertical(line)
     return line.a.x == line.b.x
 end
 
-function getseq(a, b)
-    return a:sign(b - a):b
-end
 
-function getpoints(line)
-    if ishorizontal(line)
-        xs = getseq(line.a.x, line.b.x)
-        ys = fill(line.a.y, length(xs))
-    elseif isvertical(line)
-        ys = getseq(line.a.y, line.b.y)
-        xs = fill(line.a.x, length(ys))
-    else
-        xs = getseq(line.a.x, line.b.x)
-        ys = getseq(line.a.y, line.b.y)
-    end
+function count_intersections(lines, grid, p)
+     for line in lines
+        !p(line) && continue
 
-    return zip(ys, xs)
-end
+        sx = sign(line.b.x - line.a.x)
+        sy = sign(line.b.y - line.a.y)
 
-function count_intersections(lines, grid)
-    for line in lines, p in getpoints(line)
-        grid[p[1], p[2]] += 1
+        if sx == 0 && sy == 0
+            grid[line.a.y, line.a.x] += 1
+            continue
+        end
+
+        if ishorizontal(line)
+            x = line.a.x
+            while x != line.b.x
+                grid[line.a.y, x] += 1
+                x += sx
+            end
+            grid[line.a.y, x] += 1
+        elseif isvertical(line)
+            y = line.a.y
+            while y != line.b.y
+                grid[y, line.a.x] += 1
+                y += sy
+            end
+            grid[y, line.a.x] += 1
+        else
+            x = line.a.x
+            y = line.a.y
+            while x != line.b.x
+                grid[y, x] += 1
+                x += sx
+                y += sy
+            end
+            grid[y, x] += 1
+        end
     end
 
     return count(>(1), grid)
 end
 
-function partition(p, xs)
-   matches = []
-   rest = []
-   for x in xs
-       push!(p(x) ? matches : rest, x)
-   end
-
-   return (matches, rest)
-end
-
-function part1(lines, grid)
-    return count_intersections(lines, grid)
-end
-
-function part2(lines, grid)
-    return count_intersections(lines, grid)
-end
-
 function solve()
-    lines = getinput()
-    (straights, diagonals) = partition(line -> isvertical(line) || ishorizontal(line), lines)
+    lines::Vector{LineSegment} = getinput()
 
     xmax = map(line -> max(line.a.x, line.b.x), lines) |> maximum
     ymax = map(line -> max(line.a.y, line.b.y), lines) |> maximum
-    grid = zeros(ymax , xmax)
+    grid = zeros(Int8, ymax , xmax)
 
-    return part1(straights, grid), part2(diagonals, grid)
+    return count_intersections(lines, grid, line -> isvertical(line) || ishorizontal(line)), count_intersections(lines, grid, line -> !(isvertical(line) || ishorizontal(line)))
 end
 
 p1, p2 = solve()
