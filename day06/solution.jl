@@ -1,33 +1,29 @@
 function getinput()
-    return parse.(Int, split(readline("input.txt"), ","))
-end
-
-function dothefish(fish, days)
-    timers = Dict(zip(0:8, zeros(Int64, 9)))
-    for f in fish
-        t = timers[f]
+    fishies = parse.(Int, split(readline("input.txt"), ",")) .+ 1
+    timers = zeros(Int64, 9)
+    for f in fishies
         timers[f] += 1
     end
 
+    return timers
+end
+
+function dothefish(fish, days)
     for i in 1:days
-        pregfish = timers[0]
-        for t in 1:8
-            timers[t - 1] = timers[t]
+        pregfish = fish[1]
+        for t in 2:9
+            fish[t - 1] = fish[t]
         end
-        timers[8] = pregfish
-        timers[6] += pregfish
+        fish[9] = pregfish
+        fish[7] += pregfish
     end
 
-    return sum(values(timers))
+    return sum(values(fish))
 end
 
-function part1(fish)
-    dothefish(fish, 80)
-end
+part1(fish) = dothefish(fish, 80)
 
-function part2(fish)
-    dothefish(fish, 256)
-end
+part2(fish) = dothefish(fish, 256 - 80)
 
 function solve()
     fish = getinput()
