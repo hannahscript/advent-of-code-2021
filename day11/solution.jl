@@ -12,107 +12,65 @@ function readmatrix(path, sep, type)
    return m
 end
 
-function addenergy(m, row, col)
+function addenergy(m, center)
     count = 0
 
-    for dy in (-1, 0, 1), dx in (-1, 0, 1)
-        dx == 0 && dy == 0 && continue
-        y = row + dy
-        x = col + dx
-        checkbounds(Bool, m, y, x) || continue
+    for ci in (CartesianIndices((-1:1, -1:1)) .+ center)
+        ci[1] == 0 && ci[2] == 0 && continue
+        checkbounds(Bool, m, ci) || continue
 
-        m[y, x] += 1
+        m[ci] += 1
     end
 end
 
-function step(octo)
+function step(octo, flashed)
     flashes = 0
 
-    flashed = Set()
     octo .+= 1
     while true
-        f = findall(>(9), octo)
-        f = filter(vec -> !(vec in flashed), f)
-        if isempty(f)
-            break
-        end
+        cis = filter(ci -> !flashed[ci], findall(>(9), octo))
+        isempty(cis) && break
 
-        for v in f
-            flashes += 1
-            addenergy(octo, v[1], v[2])
-        end
-
-        union!(flashed, Set(f))
+        flashes += length(cis)
+        addenergy.((octo,), cis)
+        flashed[cis] .= true
     end
 
-    for v in flashed
-        octo[v] = 0
-    end
-
-    #display(octo)
-    #println()
+    octo .*= .! flashed
+    flashed .= false
 
     return flashes
 end
 
-function step2(octo)
-    flashes = 0
-
-    flashed = Set()
-    octo .+= 1
-    while true
-        f = findall(>(9), octo)
-        #if length(f) == length(octo)
-        #    return true
-        #end
-        f = filter(vec -> !(vec in flashed), f)
-        if isempty(f)
-            break
-        end
-
-        for v in f
-            flashes += 1
-            addenergy(octo, v[1], v[2])
-        end
-
-        union!(flashed, Set(f))
-    end
-
-    for v in flashed
-        octo[v] = 0
-    end
-
-    return sum(octo) == 0
-end
-
-function part1(octo)
+function part1(octo, flashed)
     total = 0
     for i in 1:100
-        total += step(octo)
+        total += step(octo, flashed)
     end
 
     return total
 end
 
-function part2(octo)
-    i = 1
+function part2(octo, flashed)
+    i = 100
     while true
-        if step2(octo)
+        i += 1
+        if step(octo, flashed) == length(octo)
             return i
         end
-        i+=1
     end
 end
 
 function solve()
     input = getinput()
-    return part1(copy(input)), part2(copy(input))
+    flashed = fill(false, size(input))
+    return part1(input, flashed), part2(copy(input), flashed)
 end
 
 function main()
     p1, p2 = solve()
-    println("Part 1: $(p1)") #
-    println("Part 2: $(p2)") #
+    println("Part 1: $(p1)") # 1669
+    println("Part 2: $(p2)") # 351
 end
 
 main()
