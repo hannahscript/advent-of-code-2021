@@ -16,10 +16,10 @@ function getinput()
         end
     end
 
-    xmax = maximum(map(d -> d[2], dots))
-    ymax = maximum(map(d -> d[1], dots))
+    xmax = folds[findfirst(f -> f.axis == "x", folds)].pos * 2 - 1
+    ymax = folds[findfirst(f -> f.axis == "y", folds)].pos * 2 - 1
 
-    paper = zeros(Bool, ymax, xmax)
+    paper = falses(ymax, xmax)
     for d in dots
         paper[d...] = true
     end
@@ -27,36 +27,7 @@ function getinput()
     return paper, folds
 end
 
-function fold(paper, fold)
-    if fold.axis == "x"
-        left = paper[:, 1:fold.pos-1]
-        right = paper[:, end:-1:fold.pos+1]
-        sl = size(left, 2)
-        sr = size(right, 2)
-        height = size(left, 1)
-        if sl < sr
-            left = hcat(zeros(Bool, height, sr - sl), left)
-        elseif sl > sr
-            right = hcat(zeros(Bool, height, sl - sr), right)
-        end
-
-        return left .| right
-    elseif fold.axis == "y"
-        up = paper[1:fold.pos - 1, :]
-        down = paper[end:-1:fold.pos + 1, :]
-
-        su = size(up, 1)
-        sd = size(down, 1)
-        width = size(up, 2)
-        if su < sd
-            up = vcat(zeros(Bool, sd - su, width), up)
-        elseif su > sd
-            down = vcat(zeros(Bool, su - sd, width), down)
-        end
-
-        return up .| down
-    end
-end
+fold(paper, fold) = fold.axis == "x" ? paper[:, 1:fold.pos - 1] .| paper[:, end:-1:fold.pos + 1] : paper[1:fold.pos - 1, :] .| paper[end:-1:fold.pos + 1, :]
 
 function part1(paper, folds)
     return fold(paper, folds[1]) |> sum
